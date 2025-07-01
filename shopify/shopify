@@ -1,0 +1,52 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.querySelector('form.contact-form__form');
+  if (!form) {
+    console.error("Contact form not found.");
+    return;
+  }
+
+  console.log("Odoo + Google Sheets integration script loaded");
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); // Prevent default Shopify form submission
+
+    const name = form.querySelector('[name="contact[name]"]').value;
+    const email = form.querySelector('[name="contact[email]"]').value;
+    const phone = form.querySelector('[name="contact[phone]"]').value;
+    const message = form.querySelector('[name="contact[body]"]').value;
+
+    const data = { name, email, phone, message };
+
+    // 1. Send to Odoo
+    fetch('your odoo end point', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(odooResult => {
+      console.log(" Sent to Odoo:", odooResult);
+
+      //  2. Send to Google Sheets
+      return fetch('g sheet script app link', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    })
+    .then(response => response.text())
+    .then(gsResult => {
+      console.log(" Sent to Google Sheets:", gsResult);
+
+      //  3. Submit the form to Shopify
+      form.submit();
+    })
+    .catch(error => {
+      console.error(" Error sending data:", error);
+      form.submit(); // Still allow Shopify to submit
+    });
+  });
+});
+</script>
